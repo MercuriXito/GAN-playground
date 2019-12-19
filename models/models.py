@@ -128,18 +128,24 @@ class SimpleDiscriminator(nn.Module):
 ## slighted modified Discriminator
 
 class WGANcritic(nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels, with_bn = True):
         super(WGANcritic, self).__init__()
 
         def Conv2dBlock(in_channels, out_channels, \
             kernel_size, stride, padding, bias = False):
-
-            return [
-                nn.Conv2d(in_channels, out_channels, kernel_size, stride,
-                    padding = padding, bias = bias),
-                nn.BatchNorm2d(out_channels),
-                nn.LeakyReLU(0.2)
-            ]
+            if with_bn:
+                return [
+                    nn.Conv2d(in_channels, out_channels, kernel_size, stride,
+                        padding = padding, bias = bias),
+                    nn.BatchNorm2d(out_channels),
+                    nn.LeakyReLU(0.2)
+                ]
+            else:
+                return [
+                    nn.Conv2d(in_channels, out_channels, kernel_size, stride,
+                        padding = padding, bias = bias),
+                    nn.LeakyReLU(0.2)
+                ]
 
         self.features = nn.Sequential(
             *Conv2dBlock(in_channels, 32, 3, 2, 1),
