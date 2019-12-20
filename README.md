@@ -42,3 +42,7 @@ Related work:
 - WGANGP on AnimeFaces
 
    ![2019-12-20-WGANGP-AnimeFaces](docs/example-imgs/20191220_WGANGP_200epochs.png)
+
+## References
+
+- [AnimeFace-Character-dataset](http://www.nurs.or.jp/~nagadomi/animeface-character-dataset/)
