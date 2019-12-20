@@ -1,5 +1,7 @@
 __pycache__
 */__pycache__
 *.png
+!docs/*/*.png
 .vscode
 saved/*
+!saved/pretrained_models/

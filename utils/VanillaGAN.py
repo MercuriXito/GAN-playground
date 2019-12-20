@@ -13,20 +13,17 @@ import numpy as np
 
 from utils.visulize import save_batch_images
 
-class AdvTrainer:
+class GANTrainer:
     """ Vanilla Training process suggested in original paper
     """
 
-    def __init__(self, epochs, lr_G, lr_D, save_images_name):
+    def __init__(self, epochs, lr_G, lr_D, folder_name):
         
         self.lr_G = lr_G
         self.lr_D = lr_D
         self.epochs = epochs
-        # self.train_dis_times = 10 # times of training 
-        self.true_label = 1
-        self.fake_label = 0
         self.generate_batch = 32
-        self.image_save_path = "saved/images/{}/".format(save_images_name)
+        self.image_save_path = "saved/images/{}/".format(folder_name)
         self.model_save_path = "saved/models/"
 
 
@@ -90,22 +87,6 @@ class AdvTrainer:
                 if i % 100 == 0:
                     save_batch_images(images, "{}_true".format(epoch), root=self.image_save_path)
                     save_batch_images(fake_images, "{}".format(epoch), root=self.image_save_path)
-
-                    # check the gradient
-                    # for name, param in gen.named_parameters():
-                    #     with open("saved/checked/{}_grad.txt".format(name), "a") as f:
-                    #         f.write("{}_{}\n".format(epoch, i))
-                    #         f.write("{}\n{}\n{}\n\n".format(
-                    #             param.grad.mean().item(),
-                    #             param.grad.abs().max().item(),
-                    #             param.grad.abs().min().item()
-                    #         ))
-
-                    # with open("saved/checked/out_fake.txt", "a") as f:
-                    #     f.write("{}_{}\n".format(epoch, i))
-                    #     f.write("fake: {}\ntrue:{}\n\n".format(
-                    #         (out_fake < 0.5).sum().item(), (out_fake >= 0.5).sum().item()
-                    #     ))
 
         print("[ loss_G: %.6f ] - [ loss_D: %.6f ]" %( epoch_loss_G/(i+1), epoch_loss_D /(i+1) )) 
         save_batch_images(fake_images, "{}".format(epoch), root=self.image_save_path)

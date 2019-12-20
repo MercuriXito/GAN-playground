@@ -124,8 +124,9 @@ class SimpleDiscriminator(nn.Module):
         return self.classifier(x)
 
 #########################
-## WGAN 
-## slighted modified Discriminator
+## slighted modified Discriminator for WGAN
+## - remove sigmoide
+## - with or without BatchNorm layer
 
 class WGANcritic(nn.Module):
     def __init__(self, in_channels, with_bn = True):
