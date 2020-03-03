@@ -11,7 +11,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 
-from utils.visulize import save_batch_images
+from utils.visulize import save_batch
 
 class GANTrainer:
     """ Vanilla Training process suggested in original paper
@@ -22,7 +22,7 @@ class GANTrainer:
         self.lr_G = lr_G
         self.lr_D = lr_D
         self.epochs = epochs
-        self.generate_batch = 32
+        self.generate_batch = 128
         self.image_save_path = "saved/images/{}/".format(folder_name)
         self.model_save_path = "saved/models/"
 
@@ -84,12 +84,13 @@ class GANTrainer:
                         torch.max(out_fake).item(), torch.min(out_fake).item(), torch.mean(out_fake).item()
                     ))
                 
-                if i % 100 == 0:
-                    save_batch_images(images, "{}_true".format(epoch), root=self.image_save_path)
-                    save_batch_images(fake_images, "{}".format(epoch), root=self.image_save_path)
+                if i % 30 == 0:
+                    save_batch(images, "{}{}_true.png".format(self.image_save_path, epoch))
+                    save_batch(fake_images, "{}{}.png".format(self.image_save_path, epoch))
 
         print("[ loss_G: %.6f ] - [ loss_D: %.6f ]" %( epoch_loss_G/(i+1), epoch_loss_D /(i+1) )) 
-        save_batch_images(fake_images, "{}".format(epoch), root=self.image_save_path)
+        save_batch(images, "{}{}_true.png".format(self.image_save_path, epoch))
+        save_batch(fake_images, "{}{}.png".format(self.image_save_path, epoch))
 
         # save models
         save_gen_name = "generator_{}_{}.pth".format(gen.__class__.__name__, epoch + 1)

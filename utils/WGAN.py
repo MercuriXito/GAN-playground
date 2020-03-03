@@ -16,7 +16,7 @@ import torch.optim as optim
 import numpy as np
 import math
 
-from utils.visulize import save_batch_images
+from utils.visulize import save_batch
 from utils.record import record_gradient
 
 from tensorboardX import SummaryWriter
@@ -54,6 +54,8 @@ class WGANTrainer:
 
         print("Start Training, using device:{}".format(device.type))
         
+        means = dataloader.dataset.mean
+        stds = dataloader.dataset.std
         for epoch in range(self.epochs):
             print("Epoch:{}/{}".format(epoch + 1, self.epochs))
 
@@ -81,8 +83,8 @@ class WGANTrainer:
                     out_true.mean().backward(one * -1)
 
                     z = noise_generator(self.generate_batch).to(device)
-                    fakeimages = G(z)
-                    out_fake = critic(fakeimages)
+                    fake_images = G(z)
+                    out_fake = critic(fake_images)
                     out_fake.mean().backward(one)
 
                     plossD = out_fake.mean() - out_true.mean()
@@ -100,8 +102,8 @@ class WGANTrainer:
                 # train the generator
                 optimizor_G.zero_grad()
 
-                fakeimages = G(z)
-                out_fake = critic(fakeimages)
+                fake_images = G(z)
+                out_fake = critic(fake_images)
                 out_fake.mean().backward(one * -1)
 
                 avg_loss_G = - out_fake.mean().item()
@@ -116,13 +118,14 @@ class WGANTrainer:
                 self.writer.add_scalar("Wasserstrain dis", - avg_loss_D, global_step)
 
                 if i % 100 == 0:
-                    save_batch_images(images, "{}_true".format(epoch), root=self.image_save_path)
-                    save_batch_images(fakeimages, "{}".format(epoch), root=self.image_save_path)
+                    save_batch(images, "{}{}_true.png".format(self.image_save_path, epoch), mean=means, std=stds)
+                    save_batch(fake_images, "{}{}.png".format(self.image_save_path, epoch), mean=means, std=stds)
                     
 
         print("[ loss_G: %.6f ] - [ loss_D: %.6f ]" %( epoch_loss_G/(i+1), epoch_loss_D /(i+1) )) 
-        save_batch_images(fakeimages, "{}".format(epoch), root=self.image_save_path)
-
+        save_batch(images, "{}{}_true.png".format(self.image_save_path, epoch), mean=means, std=stds)
+        save_batch(fake_images, "{}{}.png".format(self.image_save_path, epoch), mean=means, std=stds)
+ 
         # save models
         save_gen_name = "generator_{}_{}.pth".format(G.__class__.__name__, epoch + 1)
         save_critic_name = "critic_{}_{}.pth".format(critic.__class__.__name__, epoch + 1)

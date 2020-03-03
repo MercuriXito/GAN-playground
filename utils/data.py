@@ -21,12 +21,15 @@ def load_minst():
     Resize to (64x64), Normalize
     """
 
-    root = baseroot
+    root = baseroot + "torch_download/"
     trainset = MNIST(root, train=True, transform=transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
         transforms.Normalize([0.5],[0.5])
     ]))
+
+    setattr(trainset, "mean", [0.5])
+    setattr(trainset, "std", [0.5])
 
     loader_params = {
         "num_workers": 2,
@@ -43,13 +46,15 @@ def load_CIFAR10():
     """ load trainset from CIFAR10, preprocess contains:
     Resize to (64x64), Normalize 
     """
-    root = baseroot
+    root = baseroot + "torch_download/"
     trainset = CIFAR10(root, train=True, transform=transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
         transforms.Normalize([0.5, 0.5, 0.5],[0.5, 0.5, 0.5])
     ]))
 
+    setattr(trainset, "mean", [0.5, 0.5,0.5])
+    setattr(trainset, "std", [0.5, 0.5, 0.5])
 
     loader_params = {
         "num_workers": 2,
@@ -138,6 +143,9 @@ def load_celebA():
         transforms.ToTensor(),
         transforms.Normalize(channel_mean, channel_std)
     ]))
+
+    setattr(dataset, "mean", channel_mean)
+    setattr(dataset, "std", channel_std)
 
     loader_params = {
         "num_workers": 2,
