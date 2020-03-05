@@ -5,3 +5,5 @@ __pycache__
 .vscode
 saved/*
 !saved/pretrained_models/
+progress.md
+test.py
