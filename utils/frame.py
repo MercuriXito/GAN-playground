@@ -2,6 +2,7 @@ import numpy as np
 import torch 
 import torch.optim as optim
 import time
+from tqdm import tqdm
 
 class Noise:
     def __init__(self, noise_size, device):
@@ -53,7 +54,8 @@ def train(opt, netG, netD, dataloader, update_class, logger):
     record_step = 0
     starttime = time.perf_counter()
     for epoch in range(1, epochs + 1):
-        for i, (images, _) in enumerate(dataloader):
+        print("Epoch:{}/{}".format(epoch, epochs))
+        for i, (images, _) in enumerate(tqdm(dataloader)):
             # updat D
             if i % train_D_interval == 0:
                 updater.updateD(images, Dstep) # updater save the loss it need

@@ -103,7 +103,7 @@ class Logger:
     def __init__(self, opt):
 
         self.base = opt.save_root
-        self.root = self.base + F.get_timestr() +"/" # root for saving data
+        self.root = self.base  # root for saving data
         self.model_root = self.root + "models/"
         self.images_root = self.root + "images/"
 

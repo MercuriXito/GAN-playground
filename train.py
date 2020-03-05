@@ -15,6 +15,11 @@ def main():
     dataset = opt.dataset
     device = opt.device
 
+    print("Using parameters:")
+    for name, value in dict(opt._get_kwargs()).items():
+        print("%20s:\t%s" %(name, value))
+
+    exit(0)
     # choose dataset
     if dataset == "mnist":
         dataloader = data.load_minst(opt)
