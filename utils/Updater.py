@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.autograd as autograd
 
 from utils.functions import weight_clip, close_grad, open_grad, calculate_gradient_penalty
+from utils.record import Logger
 
 
 class WGANUpdater:
@@ -21,7 +22,6 @@ class WGANUpdater:
         self.gp_lambda = opt.gp_lambda
         self.logger = logger
 
-        from utils.record import Logger
         self.logger = Logger(opt)
 
 
@@ -78,6 +78,8 @@ class WGANUpdater:
 
         lossG = - out_fake.mean().item()
         self.logger.writer.add_scalar("lossG", lossG, global_step=step)
+        self.logger.add_images("true", images)
+        self.logger.add_images("fake", fake_images)
 
         return fake_images
 

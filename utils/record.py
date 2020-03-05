@@ -17,6 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision.utils import make_grid, save_image
 
 import utils.functions as F
+from collections import Iterable
 
 
 def _plt_imshow(narray, name, is_gray = False):
@@ -113,7 +114,9 @@ class Logger:
             os.makedirs(self.root)
         self.writer = SummaryWriter(log_dir=self.root)
         self.opt = opt
-        self.only_show = opt.only_show # if only show, will not save except model
+        self.scalars = {}
+        self.images = {}
+        self.nrow = opt.save_images_nrow
 
 
     def save_model(self, netG, netD, epoch):
@@ -134,28 +137,54 @@ class Logger:
         json.dump(opt_dict, self.model_root + dict_name)
 
 
-    def save_images(self, images, name):
+    # def save_images(self, images, name):
 
-        if not os.path.exists(self.images_root):
-            os.makedirs(self.images_root)
+        # if not os.path.exists(self.images_root):
+            # os.makedirs(self.images_root)
 
-        image_name = "{}.png".format(name)
-        batch_size = self.opt.batch_size
+        # image_name = "{}.png".format(name)
+        # batch_size = self.opt.batch_size
+        # mean, std = self.opt.mean, self.opt.std
+        # nrow = self.nrow
+        # save_batch(images, self.images_root, image_name, mean, std, nrow, retrieve=(images.size(1) != 1))
+
+
+    def _save_writer_images(self, tag, images, step):
+
         mean, std = self.opt.mean, self.opt.std
-        nrow = 16
-        save_batch(images, self.images_root, image_name, mean, std, nrow, retrieve=(images.size(1) != 1))
+        nrow = self.nrow
+        grid = _get_grid(images, mean, std, nrow, retrieve= (images.size(1) != 1) )
+        self.writer.add_image(tag, grid, global_step=step)
 
+    def add_images(self, tag, tensor):
+        """ Temporarily save images, further use `write_images` to actually 
+        write images physically.
+        """
+        self.images[tag] = tensor
 
-    def save_writer_images(self, tag, images, epoch):
+    def write_images(self, step, tags = None): # use tags to specific the images to write
+        if tags is None:
+            for tag, value in self.images.items():
+                self._save_writer_images(tag, value, step)
+        else:
+            if not isinstance(tags, list):
+                tags = [tags]
+            for tag in tags:
+                self._save_writer_images(tag, self.images[tag], step)
 
-        mean, std = self.opt.mean, self.opt.std
-        grid = _get_grid(images, mean, std, 16)
-        self.writer.add_image(tag, grid, global_step=epoch)
+    def add_scalars(self, tag, val):
+        self.scalars[tag] = val
 
-    def save_scalar(self, tag, value, step):
-        if not self.only_show:
-            self.writer.add_scalar(tag, value, global_step = step)
-        
+    def write_scalars(self, step, tags = None): # use tags to specific the scalar to write
+        if tags is None:
+            for tag, value in self.scalars.items():
+                self.writer.add_scalar(tag, value, global_step= step)
+        else:
+            if not isinstance(tags, list):
+                tags = [tags]
+            for tag in tags:
+                self.writer.add_scalar(tag, self.scalars[tag], step)
+
 
 if __name__ == "__main__":
     pass

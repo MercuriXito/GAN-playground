@@ -72,6 +72,7 @@ def config_parser():
 
     # 生成参数
     parser.add_argument("-is", "--image-size", choices=allowed_image_size, default = 32,  type=int)
+    parser.add_argument("--save-images-nrow", default=16, type=int)
 
     # 训练参数
     parser.add_argument("-G_lr", default=1e-4, type=float)
@@ -94,7 +95,7 @@ def config_parser():
     parser.add_argument("--data-root", required=True, type=str)
     parser.add_argument("--save-model-interval", default=-1, type=int) # epoch interval to save model
     parser.add_argument("--save-num-image", default=5, type=int) # number of image to save in one epoch
-    parser.add_argument("--only-show", action="store_true") # switch to show mode, do not save the image
+    # parser.add_argument("--only-show", action="store_true") # switch to show mode, do not save the image
 
     # WGAN 的超参数
     # Weight Clipping 的 范围 

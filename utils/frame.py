@@ -59,20 +59,19 @@ def train(opt, netG, netD, dataloader, update_class, logger):
                 updater.updateD(images, Dstep) # updater save the loss it need
                 Dstep += 1
             if i % train_G_interval == 0:
-                fake_images = updater.updateG(images, Gstep)
+                updater.updateG(images, Gstep)
                 Gstep += 1
             if i in step_is:
                 # save the images
-                logger.save_images(images, "true_{}".format(epoch))
-                logger.save_images(fake_images, "fake_{}".format(epoch))
+                logger.write_images(record_step)
                 record_step += 1
 
         if epoch % interval == 0 or epoch == epochs:
             # save both models
             logger.save_model(netG, netD, epoch)
 
-        logger.save_images(images, "true_{}.png".format(epoch))
-        logger.save_images(fake_images, "fake_{}.png".format(epoch))
+        logger.write_images(record_step)
+        record_step += 1
 
     endtime = time.clock()
     train_time = (endtime - starttime)
