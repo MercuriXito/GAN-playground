@@ -125,7 +125,7 @@ class Logger:
             os.makedirs(self.model_root)
 
         # save models
-        for tag, model in zip([netG, netD],["G","D"]):
+        for tag, model in zip(["G","D"],[netG, netD]):
             name = "{}_{}_{}.pth".format(self.opt.model, tag, self.opt.dataset)
             f = self.model_root + name
             torch.save(model.state_dict(), f)
@@ -134,7 +134,8 @@ class Logger:
         opt_dict = dict(self.opt._get_kwargs())
         opt_dict["trained_epoch"] = epoch
         dict_name = "{}_{}.json".format(self.opt.model, self.opt.dataset)
-        json.dump(opt_dict, self.model_root + dict_name)
+        with open(self.model_root + dict_name, "w") as f:
+            json.dump(opt_dict, f)
 
 
     # def save_images(self, images, name):
@@ -154,7 +155,8 @@ class Logger:
         mean, std = self.opt.mean, self.opt.std
         nrow = self.nrow
         grid = _get_grid(images, mean, std, nrow, retrieve= (images.size(1) != 1) )
-        self.writer.add_image(tag, grid, global_step=step)
+        self.writer.add_image(tag, grid, global_step=step, dataformats="HWC")
+        self.writer.flush()
 
     def add_images(self, tag, tensor):
         """ Temporarily save images, further use `write_images` to actually 

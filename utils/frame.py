@@ -52,7 +52,7 @@ def train(opt, netG, netD, dataloader, update_class, logger):
     Dstep = 0
     Gstep = 0
     record_step = 0
-    starttime = time.perf_counter()
+    starttime = time.clock()
     for epoch in range(1, epochs + 1):
         print("Epoch:{}/{}".format(epoch, epochs))
         for i, (images, _) in enumerate(tqdm(dataloader)):
@@ -78,3 +78,4 @@ def train(opt, netG, netD, dataloader, update_class, logger):
     endtime = time.clock()
     train_time = (endtime - starttime)
     print("Training Using %5.2fs" %(train_time))
+    logger.writer.close()
