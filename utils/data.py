@@ -14,27 +14,28 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import MNIST, CIFAR10, ImageFolder
 import torchvision.transforms as transforms
 
-baseroot = "~/workspace/Venus/"
 
-def load_minst():
+def load_minst(opt):
     """ load trainset from MNIST, preprocess contains:
     Resize to (64x64), Normalize
     """
 
-    root = baseroot + "torch_download/"
+    root = opt.data_root
+    image_size = opt.image_size
+    mean, std = [0.5], [0.5]
     trainset = MNIST(root, train=True, transform=transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(image_size),
         transforms.ToTensor(),
-        transforms.Normalize([0.5],[0.5])
+        transforms.Normalize(mean,std)
     ]))
 
-    setattr(trainset, "mean", [0.5])
-    setattr(trainset, "std", [0.5])
+    setattr(opt, "mean", mean)
+    setattr(opt, "std", std)
 
     loader_params = {
-        "num_workers": 2,
-        "shuffle": True,
-        "batch_size": 32
+        "num_workers": opt.num_workers,
+        "shuffle": opt.shuffle,
+        "batch_size": opt.batch_size
     } 
 
     train = DataLoader(trainset, **loader_params)
@@ -42,24 +43,27 @@ def load_minst():
     return train
 
 
-def load_CIFAR10():
+def load_CIFAR10(opt):
     """ load trainset from CIFAR10, preprocess contains:
     Resize to (64x64), Normalize 
     """
-    root = baseroot + "torch_download/"
+    root = opt.data_root
+    image_size = opt.image_size
+    mean, std = [0.5, 0.5, 0.5],[0.5, 0.5, 0.5]
+
     trainset = CIFAR10(root, train=True, transform=transforms.Compose([
-        transforms.Resize(64),
+        transforms.Resize(image_size),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5],[0.5, 0.5, 0.5])
+        transforms.Normalize(mean, std)
     ]))
 
-    setattr(trainset, "mean", [0.5, 0.5,0.5])
-    setattr(trainset, "std", [0.5, 0.5, 0.5])
+    setattr(opt, "mean", mean)
+    setattr(opt, "std", std)
 
     loader_params = {
-        "num_workers": 2,
-        "shuffle": True,
-        "batch_size": 32
+        "num_workers": opt.num_workers,
+        "shuffle": opt.shuffle,
+        "batch_size": opt.batch_size
     } 
 
     train = DataLoader(trainset, **loader_params)
@@ -67,32 +71,31 @@ def load_CIFAR10():
     return train
 
 
-def load_Anime_faces():
+def load_Anime_faces(opt):
     """ Anime faces dataset from (http://www.nurs.or.jp/~nagadomi/animeface-character-dataset/)
     """
 
-    root = baseroot + "animeface-character-dataset/"
-
-    means = [0.5, 0.5, 0.5]
-    stds = [0.5, 0.5, 0.5]
+    root = opt.data_root
+    image_size = opt.image_size
+    mean, std = [0.5, 0.5, 0.5],[0.5, 0.5, 0.5]
 
     dataset = ImageFolder(root + "thumb/", transform=transforms.Compose([
         transforms.CenterCrop(120),
-        transforms.Resize(64),
+        transforms.Resize(image_size),
         transforms.ToTensor(),
-        transforms.Normalize(means, stds)
+        transforms.Normalize(mean, std)
     ]))
 
-    setattr(dataset, "mean", means)
-    setattr(dataset, "std", stds)
+    setattr(opt, "mean", mean)
+    setattr(opt, "std", std)
 
     loader_params = {
-        "num_workers": 2,
-        "shuffle": True,
-        "batch_size": 128
+        "num_workers": opt.num_workers,
+        "shuffle": opt.shuffle,
+        "batch_size": opt.batch_size
     } 
 
-    train = DataLoader(dataset, **loader_params)
+    train = DataLoader(trainset, **loader_params)
 
     return train
 
