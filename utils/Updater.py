@@ -122,7 +122,8 @@ class Updater:
         # record 
         lossD = lossD.item()
         self.logger.writer.add_scalar("lossD", lossD, global_step=step)
-
+        self.logger.add_images("true", images)
+        self.logger.add_images("fake", fake_images)
 
     def updateG(self, images, step):
 
