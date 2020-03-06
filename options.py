@@ -1,5 +1,6 @@
 import argparse
 import os, sys
+import json
 import torch
 
 """
@@ -63,7 +64,7 @@ def process_config(config):
     return config
 
 
-def config_parser():
+def train_config_parser():
 
     parser = argparse.ArgumentParser()
     # 训练参数
@@ -114,8 +115,107 @@ def config_parser():
     config = process_config(config)
     return config
 
+
+
+"""
+推断的时候的参数：
+
+全局参数：
++ 可以读取保存时的完整目录，并从模型中的 json 中恢复，保存的目录的模型的参数，图片的参数：
+
+除此之外有关的训练参数都不用管：
+
+这样剩余的参数有：
+
++ --save-images-nrow 也要可不要，可以调整
+
++ --batch-size: 可以调整
+
++ --device： 可以调整
+
+引入的其他参数：
++ --read-save-root: 读取的 root，可能是唯一需要设置的参数
++ --show-transition： 画 transition 的图片,
++ --transition-number： transition 中间的多少。
+
+"""
+
+def process_infer_config(config):
+
+    # select device
+    if not torch.cuda.is_available() and config.device == "cuda":
+            config.device = "cpu"
+            print("Cuda not available, using cpu.")
+
+    # set hyper-parameters
+    use_gp = True if config.model == "wgangp" else False
+    setattr(config, "use_gp", use_gp)
+    
+    return config
+
+
+def read_options(config):
+    """ Read parameters in saved pre-trained config specified by config.root
+    Typical save folder is as follows:
+    
+        /root 
+            /models
+                /model_G_dataset.pth
+                /model_D_dataset.pth
+                /config_model_dataset.json # config file
+            /images
+                /...
+            event-... # for tensorboard
+    """
+
+    root = config.root
+    models_root = root + "models/"
+
+    jsonfiles = ""
+    for file in os.listdir(models_root):
+        if file.split(".")[-1] == 'json' and file[:6] == "config":
+            jsonfiles = file
+
+    # print(jsonfiles)
+    with open(models_root + jsonfiles, "r") as f:
+        pre_config = json.loads(f.read())
+
+    named = jsonfiles.split(".")[0]
+    assert pre_config["model"] == named.split("_")[1], "Wrong Models"
+    assert pre_config["dataset"] == named.split("_")[2], "Wrong Dataset"
+
+    dict_config = dict(config._get_kwargs())
+    for key, val in pre_config.items():
+        if key in dict_config.keys():
+            continue
+        setattr(config, key, val)
+
+    return config
+
+
+def inference_config_parser():
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--read-save-root", type=str, dest="root", required=True)
+    parser.add_argument("--gen-batch", type=int, default=32)
+    parser.add_argument("--gen-images-nrow", type=int, default=16)
+    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--show-transition", action="store_true")
+    parser.add_argument("--transition-number", type=int, default=8)
+
+    config = parser.parse_args()
+    config = read_options(config)
+    config = process_infer_config(config)
+    return config
+
+
 if __name__ == "__main__":
     
-    opt = config_parser()
-    print(dict(opt._get_kwargs()))
-    print(opt)
+    # opt = train_config_parser()
+    # print(dict(opt._get_kwargs()))
+    # print(opt)
+    opt = inference_config_parser()
+    print("Using parameters:")
+    for name, value in dict(opt._get_kwargs()).items():
+        print("%25s:\t%s" %(name,value))

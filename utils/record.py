@@ -133,7 +133,7 @@ class Logger:
         # save the parameter
         opt_dict = dict(self.opt._get_kwargs())
         opt_dict["trained_epoch"] = epoch
-        dict_name = "{}_{}.json".format(self.opt.model, self.opt.dataset)
+        dict_name = "config_{}_{}.json".format(self.opt.model, self.opt.dataset)
         with open(self.model_root + dict_name, "w") as f:
             json.dump(opt_dict, f)
 

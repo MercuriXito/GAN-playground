@@ -1,6 +1,6 @@
 import torch
 
-from options import config_parser
+from options import train_config_parser
 from utils import data
 from utils.Updater import WGANUpdater, Updater
 from utils.frame import train
@@ -10,7 +10,7 @@ from models.models import DCGANC, DCGANG, MLPDiscriminator, MLPGenerator
 
 def main():
 
-    opt = config_parser()
+    opt = train_config_parser()
     model = opt.model
     dataset = opt.dataset
     device = opt.device
