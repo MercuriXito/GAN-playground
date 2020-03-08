@@ -26,7 +26,13 @@ def main():
         netG = DCGANG(opt.noise_size, channels, opt.image_size)
     elif model == "dcgan":
         netG = DCGANG(opt.noise_size, channels, opt.image_size)
+    elif model == "lsgan":
+        netG = DCGANG(opt.noise_size, channels, opt.image_size)
     
+    netG.load_state_dict(torch.load(opt.root + "models/" + "{}_G_{}.pth".format(
+        model, dataset
+    ), map_location=opt.device))
+
     netG.to(opt.device)
 
     print("Generator:")

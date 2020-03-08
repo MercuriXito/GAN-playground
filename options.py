@@ -35,7 +35,7 @@ import torch
 
 """
 
-allowed_model = ["wgan","wgangp","lsgan","gan","dcgan"]
+allowed_model = ["wgan","wgangp","lsgan","gan","dcgan","lsgan"]
 allowed_dataset = ["animefaces","mnist","cifar10"]
 allowed_image_size = [64, 32]
 
@@ -61,6 +61,9 @@ def process_config(config):
     use_gp = True if config.model == "wgangp" else False
     setattr(config, "use_gp", use_gp)
     
+    if config.continue_training:
+        config = read_options(config)
+
     return config
 
 
@@ -76,8 +79,8 @@ def train_config_parser():
     parser.add_argument("--save-images-nrow", default=16, type=int)
 
     # 训练参数
-    parser.add_argument("-G_lr", default=1e-4, type=float)
-    parser.add_argument("-D_lr", default=1e-4, type=float)
+    parser.add_argument("-G_lr", default=2e-4, type=float)
+    parser.add_argument("-D_lr", default=2e-4, type=float)
     parser.add_argument("-e", "--epochs", default=50, type=int)
     parser.add_argument("-G_optim", "--G_optimizer", choices=["adam","sgd"], default="adam", type=str)
     parser.add_argument("-D_optim", "--D_optimizer", choices=["adam","sgd"], default="adam", type=str)
@@ -91,11 +94,15 @@ def train_config_parser():
     parser.add_argument("--num-workers", default=16, type = int)
     parser.add_argument("--shuffle", action="store_false")
 
+    # continue-traning 参数
+    parser.add_argument("--continue-training", action="store_true")
+    parser.add_argument("--read-save-root", type=str, default="./", dest="root")
+
     # 持久化参数
     parser.add_argument("--save-root", default = "save/", type=str)
     parser.add_argument("--data-root", required=True, type=str)
     parser.add_argument("--save-model-interval", default=-1, type=int) # epoch interval to save model
-    parser.add_argument("--save-num-image", default=5, type=int) # number of image to save in one epoch
+    parser.add_argument("--save-num-image", default=1, type=int) # number of image to save in one epoch
     # parser.add_argument("--only-show", action="store_true") # switch to show mode, do not save the image
 
     # WGAN 的超参数
@@ -108,9 +115,11 @@ def train_config_parser():
 
     # LS-GAN 的超参数
     # a, b 的取值
+    parser.add_argument("--lsgan-a", default = 0, type=int)
+    parser.add_argument("--lsgan-b", default = 1, type=int)
+    parser.add_argument("--lsgan-c", default = 1, type=int)
 
     # 推断时的参数
-
     config = parser.parse_args()
     config = process_config(config)
     return config
@@ -154,7 +163,7 @@ def process_infer_config(config):
     return config
 
 
-def read_options(config):
+def read_options(config, cover = False):
     """ Read parameters in saved pre-trained config specified by config.root
     Typical save folder is as follows:
     
@@ -186,7 +195,9 @@ def read_options(config):
 
     dict_config = dict(config._get_kwargs())
     for key, val in pre_config.items():
-        if key in dict_config.keys():
+        if not cover and key in dict_config.keys():
+            if dict_config[key] != val:
+                print("Possible Conflict Keys: {}: {} {}".format(key, dict_config[key], val))
             continue
         setattr(config, key, val)
 

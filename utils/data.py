@@ -79,7 +79,7 @@ def load_Anime_faces(opt):
     image_size = opt.image_size
     mean, std = [0.5, 0.5, 0.5],[0.5, 0.5, 0.5]
 
-    dataset = ImageFolder(root + "thumb/", transform=transforms.Compose([
+    trainset = ImageFolder(root + "thumb/", transform=transforms.Compose([
         transforms.CenterCrop(120),
         transforms.Resize(image_size),
         transforms.ToTensor(),

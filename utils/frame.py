@@ -25,7 +25,7 @@ def get_optimizer(name, net, lr, betas, momentum):
 
 def train(opt, netG, netD, dataloader, update_class, logger):
     batch_size = opt.batch_size
-    number = opt.save_num_image
+    number = opt.save_num_image - 1
     noise_size = opt.noise_size
     device = opt.device
     epochs = opt.epochs

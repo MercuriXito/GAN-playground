@@ -22,8 +22,6 @@ class WGANUpdater:
         self.gp_lambda = opt.gp_lambda
         self.logger = logger
 
-        self.logger = Logger(opt)
-
 
     def updateD(self, images, step):
 
@@ -129,14 +127,14 @@ class Updater:
 
         batch_size = images.size(0)
         z = self.get_noise(batch_size)
-        label_fake = self.zero.expand((batch_size, 1))
+        label_true = self.one.expand((batch_size, 1))
 
         close_grad(self.D)
         self.optimizerG.zero_grad()
 
         fake_images = self.G(z)
         out_fake = self.D(fake_images)
-        lossG = self.criterion(out_fake, label_fake)
+        lossG = self.criterion(out_fake, label_true) 
         lossG.backward()
 
         self.optimizerG.step()
@@ -148,12 +146,73 @@ class Updater:
 
         return fake_images
 
-class LSUpdater:
-    def __init__(self, opt):
+
+class LSGANUpdater:
+    def __init__(self, opt, netG, netD, optimizerD, optimizerG, noise_generator,
+        logger):
+        self.G = netG
+        self.D = netD
+        self.optimizerD = optimizerD
+        self.optimizerG = optimizerG
+        self.get_noise = noise_generator
+        self.device = opt.device
+        self.one = torch.tensor(1, dtype=torch.float, device=self.device)
+        self.a = opt.a
+        self.b = opt.b
+        self.c = opt.c
+        self.logger = logger
+
+
+    def updateD(self, images, step):
+
+        images = images.to(self.device)
+        batch_size = images.size(0)
+        z = self.get_noise(batch_size)
+
+        a_s = torch.zeros((batch_size, 1)).fill_(self.a).to(self.device)
+        b_s = torch.zeros((batch_size, 1)).fill_(self.b).to(self.device)
+
+        ## train the critic
+        close_grad(self.G)
+        self.optimizerD.zero_grad()
+        out_true = self.D(images)
+        lossD_true = torch.mean(torch.pow((out_true - b_s) , 2))
+
+        fake_images = self.G(z)
+        out_fake = self.D(fake_images)
+        lossD_fake = torch.mean(torch.pow((out_fake - a_s) , 2))
+        lossD = lossD_true + lossD_fake
+        lossD.backward()
+
+        self.optimizerD.step()
+        open_grad(self.G)
+        
+        # record 
+        lossD = lossD.item() 
+        self.logger.writer.add_scalar("lossD", lossD, global_step=step)
+        
         pass 
 
-    def updateD():
-        pass 
 
-    def updateG():
-        pass
+    def updateG(self, images, step):
+
+        z = self.get_noise(images.size(0))
+        c_s = torch.zeros((images.size(0), 1)).fill_(self.c).to(device)
+        close_grad(self.D)
+        
+        self.optimizerG.zero_grad()
+        fake_images = self.G(z)
+        out_fake = self.D(fake_images)
+        lossG = torch.mean(torch.pow((out_fake - c_s), 2))
+        lossG.backward()
+        self.optimizerG.step()
+
+        open_grad(self.D)
+
+        lossG = lossG.item()
+        self.logger.writer.add_scalar("lossG", lossG, global_step=step)
+        self.logger.add_images("true", images)
+        self.logger.add_images("fake", fake_images)
+
+        return fake_images
+

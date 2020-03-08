@@ -2,7 +2,7 @@ import torch
 
 from options import train_config_parser
 from utils import data
-from utils.Updater import WGANUpdater, Updater
+from utils.Updater import WGANUpdater, Updater, LSGANUpdater
 from utils.frame import train
 from utils.record import Logger
 from models.models import DCGANC, DCGANG, MLPDiscriminator, MLPGenerator
@@ -40,6 +40,15 @@ def main():
     elif model == "dcgan":
         netG = DCGANG(opt.noise_size, channels, opt.image_size)
         netD = DCGANC(channels, opt.image_size)
+    elif model == "lsgan":
+        netG = DCGANG(opt.noise_size, channels, opt.image_size)
+        netD = DCGANC(channels, opt.image_size, use_as_critic=True)
+
+    if opt.continue_training:
+        for name, net in zip(["G","D"], [netG, netD]):
+            net.load_state_dict(torch.load(opt.root + "models/" + "{}_{}_{}.pth".format(
+                model, name, dataset
+            ), map_location=opt.device))
     
     netG.to(opt.device)
     netD.to(opt.device)
@@ -53,11 +62,13 @@ def main():
     # print(x.size())
     # print(opt.image_size)
     # print(netD(x).size())
-    # exit(0)
+    exit(0)
 
     # choose update method
     if "wgan" in model:
         update_class = WGANUpdater
+    elif "lsgan" in model:
+        update_class = LSGANUpdater
     else:
         update_class = Updater
 

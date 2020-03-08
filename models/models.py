@@ -141,7 +141,7 @@ class DCGANG(nn.Module):
         last_channels = input_size
         blocks = []
         for i in range(num_layers - 1):
-            this_channels = 2 ** (8 - i)
+            this_channels = 2 ** (9 - i)
             blocks += Conv2dTransposeBlocks(last_channels, this_channels, 4, 2, 1)
             last_channels = this_channels
         blocks += [
