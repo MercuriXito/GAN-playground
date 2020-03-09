@@ -157,9 +157,9 @@ class LSGANUpdater:
         self.get_noise = noise_generator
         self.device = opt.device
         self.one = torch.tensor(1, dtype=torch.float, device=self.device)
-        self.a = opt.a
-        self.b = opt.b
-        self.c = opt.c
+        self.a = opt.lsgan_a
+        self.b = opt.lsgan_b
+        self.c = opt.lsgan_c
         self.logger = logger
 
 
@@ -197,7 +197,7 @@ class LSGANUpdater:
     def updateG(self, images, step):
 
         z = self.get_noise(images.size(0))
-        c_s = torch.zeros((images.size(0), 1)).fill_(self.c).to(device)
+        c_s = torch.zeros((images.size(0), 1)).fill_(self.c).to(self.device)
         close_grad(self.D)
         
         self.optimizerG.zero_grad()

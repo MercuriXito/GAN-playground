@@ -62,7 +62,7 @@ def main():
     # print(x.size())
     # print(opt.image_size)
     # print(netD(x).size())
-    exit(0)
+    # exit(0)
 
     # choose update method
     if "wgan" in model:
