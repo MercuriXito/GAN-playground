@@ -71,7 +71,11 @@ def save_batch(images, root, name, mean = None, std = None, nrow = 0,
     grid = _get_grid(images, mean, std, nrow, retrieve)
     pltt = _plt_imshow(grid, "Images", images.size(1) == 1)
     pltt.savefig(root + name)
-    
+
+
+def save_batch_vision(images, root, name, nrow ):
+    save_image(images, root + os.sep + name, nrow=nrow, normalize=True)
+
 
 def show_transition(netG, num_img = 8, num_transition = 8, noise_size = 100,
         means = None, stds = None, device = None, savename = None):
@@ -196,6 +200,13 @@ class Logger:
                 tags = [tags]
             for tag in tags:
                 self.writer.add_scalar(tag, self.scalars[tag], step)
+
+    def save_epoch_images(self, epoch):
+        if not os.path.exists(self.images_root):
+            os.makedirs(self.images_root)
+
+        for tag, value in self.images.items():
+            save_batch_vision(value, self.images_root, "{}_{}.png".format(tag, epoch), self.nrow,)
 
 
 if __name__ == "__main__":

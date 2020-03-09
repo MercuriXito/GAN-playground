@@ -71,6 +71,7 @@ def train(opt, netG, netD, dataloader, update_class, logger):
         if epoch % interval == 0 or epoch == epochs:
             # save both models
             logger.save_model(netG, netD, epoch)
+            logger.save_epoch_images(epoch)
 
         logger.write_images(record_step)
         record_step += 1
