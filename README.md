@@ -1,51 +1,72 @@
 # GANs
 
-Implementation of serveral GANs with pytorch:
+A simple frame for training several GANs with pytorch on different Datasets.
 
-- [x] Vanilla GAN (with MLP)
-- [x] DCGAN
-- [x] WGAN
-- [x] WGAN-GP
-- [ ] SA-GAN (Attention)
-- [ ] cGAN
+Models Available:
 
-Related work:
+- [x] Vanilla GAN： MLP + Vanilla Loss.
+- [x] DCGAN: DCGAN + Vanilla Loss.
+- [x] WGAN: DCGAN + weight clipping + WGAN Loss.
+- [x] WGAN-GP: DCGAN + gradient penalty + WGAN Loss.
+- [x] LSGAN: DCGAN + LS Loss.
 
-- [ ] Evaluation methods of GAN.
-- [ ] Better Visiualization.
-- [ ] TensorBoardX logging.
+Dataset Available:
+
+- [x] MNIST
+- [x] CIFAR-10
+- [x] [AnimeFaces](http://www.nurs.or.jp/~nagadomi/animeface-character-dataset/)
+
+
+## Usage
+
+1. Training 
+
+Training models with prepared models and dataset. 
+
+```
+python train.py [model] [dataset] --data-root [data-root]
+```
+
+2. Inference
+
+```
+python inference.py --read-save-root [save-root]
+```
+
+- `save-root` specify the record folder saved in training process.
+
+I also provide a way to show tranistion images:
+```
+python inference.py --read-save-root [save-root] --show-transition --transition-number [tnumber]
+```
+
+3. Continue Training
+
+Continuing your training based on thosed already trianed ones.
+
+```
+python train.py [model] [dataset] --data-root [data-root] --continue-training --read-save-root [saved-path]  --save-root [save-root]
+```
+
+- `save_path` specify the folder containing the trained models.
+
+- I suggest to use `save-root` to specify a new folder to save training record and  avoid overriding the record before.
+
+- Attention that **there might be conflict settings between that in continuing training and in before training.** This might lead to some problems when loading the trained models, so when encoutering this problem, please check the conflict setttings (especially those about models) at first. Mind the settings of continuing training would be used priorly. 
+
 
 ## Training Record
 
-| model | lr_G | lr_D | epochs | methods | dataset |
-| -- | -- | -- | -- | -- | -- |
-| MLP | 0.0002 | 0.0002 | 40 | Adam betas = (0.5, 0.999) | MNIST |
-| DCGAN | 0.0002 | 0.0002 | 200 | Adam betas = (0.5, 0.999) | AnimeFaces |
-| WGAN | 5e-5 | 5e-5 | 50 | RMSprop | AnimeFaces |
-| WGAN-GP | 1e-4 | 1e-4 | 200 | Adam betas = (0,0.9), $\lambda=10$ | AnimeFaces |
+1. WGANGP on AnimeFaces, trained 400 epochs.
 
-## Problems Record
+![WGANGP](docs/example-imgs/20200309_wgangp_animefaces.png)
 
-- It's a little strange to fail to train the WGAN(Weight-Clipping ver), the generator worked at first and learned some features like shape, but after a while, the generator seemingly could not improve anymore, **the generated images often lack details and structure**, and **the Wasserstain Distance preserve at the same level**. (2019.12.19)
+The generated images lose some fine details, but do not show mode collapse. More training steps would help. The pre-trained `--read-save-root` is `save/wgangp_anime/`
 
-   The problem get improved after training WGAN for more epochs, but it converge slower than vanilla training methods. 
 
-## Training Examples
+## Reference
 
-Better Training results will be updated.
-
-- 3-layers MLP on MNIST:
-
-   ![2019-12-08-MLP-MNIST](docs/example-imgs/20191208_MLP_40epochs.png)
-
-- DCGAN on AnimeFaces: (No mode collapse) 
-
-   ![2019-12-21-DCGAN-AnimeFaces](docs/example-imgs/20191221_DCGAN_200epochs.png)
-
-- WGANGP on AnimeFaces
-
-   ![2019-12-20-WGANGP-AnimeFaces](docs/example-imgs/20191220_WGANGP_200epochs.png)
-
-## References
-
-- [AnimeFace-Character-dataset](http://www.nurs.or.jp/~nagadomi/animeface-character-dataset/)
+- DCGAN: [Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks](https://arxiv.org/pdf/1511.06434)
+- WGAN: [Wasserstain Generative Adversarial Networks](https://arxiv.org/pdf/1701.07875)
+- WGAN-GP: [Improved Training of Wasserstain GANs](http://papers.nips.cc/paper/7159-improved-training-of-wasserstein-gans.pdf)
+- LSGAN: [Least Squares Generative Adversarial Networks](http://openaccess.thecvf.com/content_ICCV_2017/papers/Mao_Least_Squares_Generative_ICCV_2017_paper.pdf)
